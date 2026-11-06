@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f7a4d">
+<meta name="description" content="Learn the Ge’ez fidel and Amharic with interactive flashcards, quizzes, letter charts and offline practice.">
+<meta name="application-name" content="Fidel Flashcards">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fidel">
+<title>Fidel Flashcards: learn Amharic and Ge’ez</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{--bg:#eef3fb;--card:#fff;--ink:#1c2538;--mute:#5d6a85;--line:#d5dded;--green:#1f7a4d;--gold:#f0b429;--red:#c8402f;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121826;--card:#1c2538;--ink:#eef2fb;--mute:#9aa8c7;--line:#2f3b57;--green:#3fb77c;--red:#e5705f;--on:#0c1220;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121826;--card:#1c2538;--ink:#eef2fb;--mute:#9aa8c7;--line:#2f3b57;--green:#3fb77c;--red:#e5705f;--on:#0c1220;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.5 "Nunito",system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px;font-weight:800}
+.sub{color:var(--mute);margin:0 0 14px}
+button,select,input,textarea{font:inherit;color:inherit}
+.modes{display:flex;gap:6px;background:var(--line);padding:4px;border-radius:14px;margin-bottom:14px}
+.modes button{flex:1;border:0;background:none;padding:8px;border-radius:10px;font-weight:800;cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.decks{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.deck{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer}
+.deck[aria-pressed="true"]{border-color:var(--green);background:var(--green);color:var(--on)}
+.stage{perspective:1200px}
+.card{position:relative;width:100%;height:min(62vw,320px);min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform .45s;border:0;background:none;padding:0}
+.card.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;background:var(--card);border:2px solid var(--line);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;border-bottom:8px solid var(--gold)}
+.back{transform:rotateY(180deg);border-bottom-color:var(--green)}
+.big{font:700 clamp(5rem,28vw,9rem)/1.1 "Noto Sans Ethiopic","Abyssinica SIL",sans-serif}
+.word{font:700 clamp(3.2rem,16vw,5.5rem)/1.2 "Noto Sans Ethiopic","Abyssinica SIL",sans-serif}
+.sound{font-size:clamp(2.2rem,12vw,4rem);font-weight:800;color:var(--green)}
+.meaning{color:var(--mute);margin-top:6px}
+.hint{color:var(--mute);font-size:.85rem;margin-top:8px}
+.bar{display:flex;gap:10px;margin-top:16px}
+.bar button{flex:1;padding:14px;border-radius:16px;border:0;font-weight:800;cursor:pointer;font-size:1.05rem}
+.again{background:var(--red);color:var(--on)}.got{background:var(--green);color:var(--on)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tools button,.mini{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:6px 12px;cursor:pointer}
+.tools label{display:flex;align-items:center;gap:6px;color:var(--mute)}
+.tools select{padding:4px 8px;border:2px solid var(--line);border-radius:10px;background:var(--card)}
+.prog{margin-top:14px;color:var(--mute);display:flex;justify-content:space-between;gap:8px}
+.track{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:6px}
+.fill{height:100%;background:var(--green);width:0;transition:width .3s}
+.qcard{background:var(--card);border:2px solid var(--line);border-bottom:8px solid var(--gold);border-radius:24px;padding:20px;text-align:center;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.opt{padding:16px 8px;border-radius:16px;border:2px solid var(--line);background:var(--card);font-weight:800;font-size:1.1rem;cursor:pointer}
+.opt.ok{background:var(--green);border-color:var(--green);color:var(--on)}
+.opt.no{background:var(--red);border-color:var(--red);color:var(--on)}
+.next{width:100%;margin-top:12px;padding:14px;border:0;border-radius:16px;background:var(--gold);color:#1c2538;font-weight:800;cursor:pointer}
+.score{font-size:3rem;font-weight:800;color:var(--green)}
+.chartwrap{overflow-x:auto;background:var(--card);border:2px solid var(--line);border-radius:16px}
+.ctabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px}
+table{border-collapse:collapse;width:100%;text-align:center}
+th{color:var(--mute);font-size:.8rem;padding:6px 2px;position:sticky;top:0;background:var(--card)}
+td{padding:2px}
+td button{width:100%;border:0;background:none;cursor:pointer;font:700 1.7rem "Noto Sans Ethiopic",sans-serif;padding:4px 0;border-radius:8px}
+td button:hover{background:var(--line)}
+td.h{color:var(--mute);font-size:.8rem;padding:0 6px}
+.cinfo{position:sticky;bottom:8px;margin-top:10px;background:var(--green);color:var(--on);border-radius:14px;padding:10px;text-align:center;font-weight:800}
+details{margin-top:28px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px}
+summary{cursor:pointer;font-weight:800}
+form{display:grid;gap:8px;margin:12px 0}
+form input,form select,textarea{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg)}
+.save{background:var(--green);color:var(--on);border:0;border-radius:12px;padding:10px;font-weight:800;cursor:pointer}
+.list{max-height:260px;overflow:auto;border-top:2px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.row .f{font:700 1.6rem "Noto Sans Ethiopic",sans-serif;min-width:3.2rem}
+.row .t{flex:1;min-width:0;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gaprow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}
+.tile{background:var(--card);border:2px solid var(--line);border-bottom:5px solid var(--gold);border-radius:12px;padding:6px 0 4px;text-align:center}
+.tile .g{font:700 clamp(1.6rem,8vw,2.6rem)/1.2 "Noto Sans Ethiopic",sans-serif;min-height:1.3em}
+.tile .s{font-size:.75rem;color:var(--mute);min-height:1.2em}
+.tile.gap{border-style:dashed;border-bottom-color:var(--line)}
+.tile.act{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--card))}
+.tile.done{border-color:var(--green);border-bottom-color:var(--green)}
+.bank{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.bank button{font:700 2.2rem "Noto Sans Ethiopic",sans-serif;min-width:64px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:var(--card);cursor:pointer}
+.bank button.no{background:var(--red);color:var(--on);border-color:var(--red)}
+.bank button.used{opacity:.3;pointer-events:none}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:700px){.modes{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;border-radius:18px 18px 0 0;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:2px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.12)}.modes button{padding:12px 4px;font-size:.95rem}.modes button[aria-pressed="true"]{background:var(--green);color:var(--on);box-shadow:none}main{padding-bottom:110px}.cinfo{bottom:84px}}
+@media(min-width:900px){main{max-width:880px}.card{height:360px}.opts{gap:14px}.opt{padding:22px 8px;font-size:1.25rem}.tile .g{font-size:3rem}.bar button{padding:18px}}
+.how{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 14px;color:var(--mute);font-size:.92rem}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.card,.fill{transition:none}}
+
+/* Modern Fidel refresh */
+:root{--bg:#f4f7f4;--card:#ffffff;--ink:#172235;--mute:#667386;--line:#e1e8e2;--green:#1f7a4d;--gold:#f0b429;--red:#c8402f;--on:#fff;color-scheme:light}
+body{background:radial-gradient(ellipse at 10% 0%,rgba(240,180,41,.13),transparent 32rem),linear-gradient(180deg,#f7faf7 0%,var(--bg) 55%,#edf4ef 100%);font-family:"Nunito",system-ui,sans-serif;letter-spacing:.005em}
+main{max-width:980px;padding:30px 22px 56px}
+.brandbar{display:flex;align-items:center;gap:16px;margin:0 0 20px;padding:18px 20px;background:linear-gradient(115deg,#176b45,#218657);border-radius:24px;color:#fff;box-shadow:0 14px 35px rgba(20,91,59,.16)}
+.brandmark{width:64px;height:64px;object-fit:cover;border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.brandcopy{min-width:0;flex:1}
+.brandbar h1{font-size:clamp(1.35rem,3vw,1.8rem);line-height:1.15;margin:0;color:#fff}
+.brandbar .sub{color:rgba(255,255,255,.82);margin:5px 0 0;font-size:.96rem}
+.eyebrow{font-size:.67rem;letter-spacing:.16em;font-weight:800;color:#f8d77e;margin:0 0 5px}
+.install-app{border:1px solid rgba(255,255,255,.45);background:#f0b429;color:#172235;padding:10px 15px;border-radius:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+.how{border:1px solid #e7d9ad;background:#fffaf0;color:#66552b;border-radius:16px;padding:13px 16px;margin:0 0 18px}
+.modes{background:#e8eee9;border:1px solid #dce6de;padding:5px;border-radius:16px;gap:5px;margin-bottom:18px}
+.modes button{padding:11px 12px;border-radius:12px;color:#526174;transition:background .2s, color .2s}
+.modes button[aria-pressed="true"]{background:#1f7a4d;color:#fff;box-shadow:0 4px 12px rgba(31,122,77,.2)}
+.decks{gap:9px;margin-bottom:18px}
+.deck{padding:8px 15px;border-radius:999px;background:#fff;border:1px solid #dce5de;font-weight:800;transition:all .2s}
+.deck[aria-pressed="true"]{background:#1f7a4d;border-color:#1f7a4d;color:#fff;box-shadow:0 4px 12px rgba(31,122,77,.16)}
+.tools{align-items:center}
+.tools button,.mini{border:1px solid #dce5de;background:#fff;border-radius:11px;padding:8px 13px;font-weight:800;transition:transform .15s,border-color .15s}
+button:hover{filter:brightness(.98)}
+.tools button:hover,.mini:hover,.deck:hover{transform:translateY(-1px);border-color:#a9c5b2}
+.tools select{border:1px solid #dce5de;border-radius:10px;background:#fff;padding:6px 9px}
+.stage{margin-top:6px}
+.card{height:min(52vw,390px);min-height:270px;filter:drop-shadow(0 12px 22px rgba(22,44,31,.07))}
+.face{border:1px solid #e3eae4;border-bottom:8px solid #f0b429;border-radius:26px;box-shadow:0 12px 32px rgba(25,45,31,.06)}
+.back{border-bottom-color:#1f7a4d}
+.bar{gap:12px;margin-top:18px}
+.bar button{border-radius:14px;box-shadow:0 5px 14px rgba(0,0,0,.07)}
+.again{background:#b84235}.got{background:#1f7a4d}
+.prog{font-size:.9rem;font-weight:800;margin-top:18px}
+.track{height:9px;background:#e3ebe5;border-radius:99px}
+.fill{background:linear-gradient(90deg,#1f7a4d,#55ad79);border-radius:99px}
+.qcard{border:1px solid #e3eae4;border-bottom:8px solid #f0b429;border-radius:24px;box-shadow:0 12px 30px rgba(25,45,31,.05)}
+.opt{border:1px solid #dfe8e1;border-radius:15px;background:#fff;transition:transform .15s,border-color .15s}
+.opt:hover{transform:translateY(-2px);border-color:#a9c5b2}
+.next{border-radius:14px;box-shadow:0 5px 14px rgba(240,180,41,.18)}
+.chartwrap{border:1px solid #e0e8e2;border-radius:18px;box-shadow:0 8px 24px rgba(25,45,31,.04)}
+td button{border-radius:10px}
+.cinfo{border-radius:14px;box-shadow:0 8px 18px rgba(31,122,77,.15)}
+details{border:1px solid #e0e8e2;border-radius:18px;box-shadow:0 8px 24px rgba(25,45,31,.035)}
+form input,form select,textarea{border:1px solid #dce5de;border-radius:11px;background:#fbfdfb}
+.save{border-radius:12px}
+.row{padding:9px 2px}
+.row .mini{font-size:.84rem}
+.gaprow{gap:8px}
+.tile{border:1px solid #e0e8e2;border-bottom:5px solid #f0b429;border-radius:13px;background:#fff}
+.bank button{border:1px solid #dce5de;border-radius:14px;background:#fff;box-shadow:0 3px 9px rgba(25,45,31,.04)}
+:focus-visible{outline:3px solid #f0b429;outline-offset:3px}
+@media(max-width:700px){
+  main{padding:14px 13px 112px}
+  .brandbar{gap:12px;padding:14px;border-radius:19px;margin-bottom:15px}
+  .brandmark{width:52px;height:52px;border-radius:14px}
+  .eyebrow{font-size:.58rem}
+  .brandbar .sub{font-size:.83rem}
+  .install-app{padding:8px 10px;font-size:.8rem}
+  .modes{position:fixed;left:8px;right:8px;bottom:8px;border-radius:17px;z-index:20;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border:1px solid #dce5de;box-shadow:0 8px 28px rgba(19,44,28,.16)}
+  .modes button{padding:11px 3px;font-size:.83rem}
+  .modes button[aria-pressed="true"]{background:#1f7a4d;color:#fff}
+  .card{height:66vw;min-height:250px}
+  .bar button{padding:13px 8px}
+  .cinfo{bottom:82px}
+}
+@media(min-width:900px){.modes{max-width:720px}.card{height:370px}.qcard{min-height:230px}}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#111b17;--card:#1b2922;--ink:#edf5ef;--mute:#a9b9ad;--line:#35483c;--green:#39a86d;--red:#e5705f;color-scheme:dark}
+  body{background:radial-gradient(ellipse at 10% 0%,rgba(240,180,41,.08),transparent 32rem),#111b17}
+  .brandbar{background:linear-gradient(115deg,#145b3a,#1f7a4d)}
+  .how{background:#302a18;border-color:#66552b;color:#f0dca2}
+  .modes{background:#202e26;border-color:#35483c}
+  .modes button{color:#c1d0c5}
+  .modes button[aria-pressed="true"]{background:#39a86d;color:#0d1a12}
+  .deck,.tools button,.mini,.tools select,.opt,.tile,.bank button{background:#1b2922;border-color:#35483c;color:#edf5ef}
+  .deck[aria-pressed="true"]{background:#237a4e;color:#fff}
+  .face,.qcard,.chartwrap,details{border-color:#35483c}
+  .track{background:#35483c}
+  form input,form select,textarea{background:#142019;border-color:#35483c}
+  .modes{background:rgba(27,41,34,.96)}
+}
+
+</style>
+</head>
+<body>
+<main>
+<header class="brandbar">
+  <img class="brandmark" src="icon-192.png" alt="Fidel logo">
+  <div class="brandcopy">
+    <p class="eyebrow">AMHARIC • GE’EZ • DAILY PRACTICE</p>
+    <h1>Fidel Flashcards</h1>
+    <p class="sub">Build confidence with every letter, word and sound.</p>
+  </div>
+  <button class="install-app" id="installBtn" type="button" hidden>Install app</button>
+</header>
+<p class="how"><b>How to learn:</b> start with <b>Chart</b> to see the letters, practice with <b>Flashcards</b>, then test yourself in <b>Quiz</b> and <b>Fill gaps</b>. Five minutes a day is plenty.</p>
+<div class="modes" id="modes"><button data-m="flash" aria-pressed="true">Flashcards</button><button data-m="quiz" aria-pressed="false">Quiz</button><button data-m="gap" aria-pressed="false">Fill gaps</button><button data-m="chart" aria-pressed="false">Chart</button></div>
+<div class="decks" id="decks" role="group" aria-label="Decks"></div>
+<div class="tools" style="margin:-6px 0 14px"><label>Answer sound <select id="sndon"><option value="1">On</option><option value="0">Off</option></select></label><label>Plays after <select id="snddelay"><option value="0">Right away</option><option value="2">2 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select></label></div>
+
+<section id="flash">
+<div class="stage"><button class="card" id="card" aria-label="Flashcard, tap to flip"><div class="face front" id="front"></div><div class="face back" id="back"></div></button></div>
+<div class="bar"><button class="again" id="again">Again</button><button class="got" id="got">Got it</button></div>
+<div class="tools"><button id="speak">Say it</button><button id="prev">Back</button><button id="shuf">Shuffle</button><button id="reset">Restart deck</button></div>
+<div class="prog"><span id="pos"></span><span id="known"></span></div><div class="track"><div class="fill" id="fill"></div></div>
+</section>
+
+<section id="quizbox" hidden>
+<div class="prog"><span id="qpos"></span><span id="qscore"></span></div>
+<div class="qcard" id="qcard"></div>
+<div class="opts" id="opts"></div>
+<button class="next" id="qnext" hidden>Next question</button>
+</section>
+
+<section id="chartbox" hidden>
+<p class="hint" style="margin-top:0">The full fidel chart in school order. Each row is one consonant family. Tap any letter to see and hear its sound.</p>
+<div class="chartwrap" id="chart"></div>
+<div class="cinfo" id="cinfo" hidden></div>
+</section>
+
+<section id="gapbox" hidden>
+<p class="hint" style="margin-top:0">Each row of the chart is missing letters. The first letter stays as an example. Tap the right letters to fill every highlighted gap, one consonant family at a time.</p>
+<div class="tools" style="margin:0 0 4px"><label>Practice <select id="gord"><option value="o">Every consonant, in order</option><option value="s">Every consonant, shuffled</option><option value="q">Quick round of 5</option></select></label><label>Rows from <select id="gsrc"><option value="b">All consonants</option><option value="c">Classic Ge’ez only</option><option value="x">Amharic extras only</option></select></label><label>Missing <select id="gn"><option value="2">2 letters</option><option value="3">3 letters</option><option value="4">4 letters</option></select></label><label>Sounds <select id="gh"><option value="1">Show</option><option value="0">Hide</option></select></label></div>
+<div class="prog"><span id="gpos"></span><span id="gscore"></span></div>
+<div class="gaprow" id="gaprow"></div>
+<div class="bank" id="bank"></div>
+<p class="hint" id="gmsg" style="text-align:center;min-height:1.4em"></p>
+<button class="next" id="gnext" hidden>Next row</button>
+</section>
+
+<details id="edit"><summary>Edit cards</summary>
+<form id="form">
+<select id="fdeck"></select>
+<input id="ffront" placeholder="Front: Ge’ez letter or word, like ቤት" required lang="am">
+<input id="fsound" placeholder="Sound, like bet" required>
+<input id="fmean" placeholder="Meaning (optional), like house">
+<button class="save" id="fsave" type="submit">Add card</button>
+</form>
+<div class="list" id="list"></div>
+<div class="tools"><button id="exp">Copy all cards</button><button id="imp">Load cards</button><button id="def">Restore starter cards</button></div>
+<textarea id="io" rows="4" placeholder="Copied cards appear here. Paste cards here, then press Load cards." hidden></textarea>
+<p class="hint">Cards save in this browser on this device. Use Copy all cards to move them to another device.</p>
+</details>
+<p class="how" style="margin-top:20px"><b>Keep it on your phone:</b> on iPhone, tap Share in Safari, then Add to Home Screen. On Android, open the Chrome menu, then Add to Home screen. It opens like an app.</p>
+</main>
+<script>
+(function(){
+var ORD=["ä","u","i","a","e","ə","o"];
+var CLASSIC=[[0x1200,"h"],[0x1208,"l"],[0x1210,"h","same sound as ሀ"],[0x1218,"m"],[0x1220,"s","same sound as ሰ"],[0x1228,"r"],[0x1230,"s"],[0x1240,"q"],[0x1260,"b"],[0x1270,"t"],[0x1280,"h","same sound as ሀ"],[0x1290,"n"],[0x12A0,"","vowel letter"],[0x12A8,"k"],[0x12C8,"w"],[0x12D0,"","same sound as አ"],[0x12D8,"z"],[0x12E8,"y"],[0x12F0,"d"],[0x1308,"g"],[0x1320,"t’","sharp t"],[0x1330,"p’","sharp p"],[0x1338,"ts’","sharp ts"],[0x1340,"ts’","same sound as ጸ"],[0x1348,"f"],[0x1350,"p"]];
+var EXTRA=[[0x1238,"sh"],[0x1268,"v"],[0x1278,"ch"],[0x1298,"ny"],[0x12B8,"kh"],[0x12E0,"zh"],[0x1300,"j"],[0x1318,"ng"],[0x1328,"ch’","sharp ch"]];
+var WORDS=[["እናት","enat","mother"],["አባት","abat","father"],["ውሃ","wuha","water"],["እንጀራ","injera","injera, flatbread"],["ቤት","bet","house"],["ድመት","dimet","cat"],["ውሻ","wusha","dog"],["ቡና","buna","coffee"],["ልጅ","lij","child"],["ሰላም","selam","hello, peace"],["ወተት","wetet","milk"],["እሺ","eshi","okay"]];
+var NCODE=[0x1369,0x136A,0x136B,0x136C,0x136D,0x136E,0x136F,0x1370,0x1371,0x1372,0x1373,0x1374,0x1375,0x1376,0x1377,0x1378,0x1379,0x137A,0x137B];
+var NUMS2=[["and","1"],["hulet","2"],["sost","3"],["arat","4"],["amist","5"],["sidist","6"],["sebat","7"],["simint","8"],["zeteny","9"],["asir","10"],["haya","20"],["selasa","30"],["arba","40"],["hamsa","50"],["silsa","60"],["seba","70"],["semanya","80"],["zetena","90"],["meto","100"]];
+var DECKS=["Classic Ge’ez","Amharic extras","Words","Numbers","My cards"];
+var C="Classic Ge’ez",X="Amharic extras";
+function starter(){var c=[],i=0;
+function fam(list,deck){list.forEach(function(r){for(var k=0;k<7;k++)c.push({id:"l"+(i++),deck:deck,front:String.fromCharCode(r[0]+k),sound:r[1]+ORD[k],meaning:r[2]||""});});}
+fam(CLASSIC,C);fam(EXTRA,X);
+WORDS.forEach(function(w,k){c.push({id:"w"+k,deck:"Words",front:w[0],sound:w[1],meaning:w[2]});});
+NUMS2.forEach(function(n,k){c.push({id:"n"+k,deck:"Numbers",front:String.fromCharCode(NCODE[k]),sound:n[0],meaning:n[1]});});
+return c;}
+var cards,known={},deck=C,order=[],idx=0,flipped=false,editId=null,mode="flash",q=null;
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var old=load("fidel-cards",null),mine=old?old.filter(function(c){return c.deck==="My cards";}):[];
+cards=load("fidel-cards-2",null)||starter().concat(mine);known=load("fidel-known-2",{});
+var $=function(i){return document.getElementById(i);};
+function inDeck(){return cards.filter(function(c){return c.deck===deck;});}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function rebuild(s){order=inDeck().map(function(c){return c.id;});if(s)order=shuf(order);idx=0;}
+function cur(){var id=order[idx];return cards.filter(function(c){return c.id===id;})[0];}
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+var tm=null,warned=false,snd=load("fidel-snd",{on:"1",delay:"5"});
+function say(t){if(!window.speechSynthesis)return false;var v=speechSynthesis.getVoices();if(v.length&&!warned&&!v.some(function(x){return /^am/i.test(x.lang);})){warned=true;alert("This device has no Amharic voice, so the sound may be silent or wrong. Android with Google speech usually has one.");}var u=new SpeechSynthesisUtterance(t);u.lang="am-ET";u.rate=.7;speechSynthesis.cancel();speechSynthesis.speak(u);return true;}
+function sayLater(t){clearTimeout(tm);if(snd.on!=="1"||!window.speechSynthesis)return;try{speechSynthesis.speak(new SpeechSynthesisUtterance(""));}catch(e){}tm=setTimeout(function(){say(t);},(+snd.delay)*1000);}
+function show(){
+clearTimeout(tm);var c=cur(),f=$("front"),b=$("back");flipped=false;$("card").classList.remove("flip");
+if(!c){f.innerHTML='<div class="meaning">This deck is empty. Open “Edit cards” to add one.</div>';b.innerHTML="";$("pos").textContent="";$("known").textContent="";$("fill").style.width="0";return;}
+var cls=Array.from(c.front).length>1?"word":"big";
+f.innerHTML='<div class="'+cls+'" lang="am">'+esc(c.front)+'</div><div class="hint">Tap to flip</div>';
+b.innerHTML='<div class="sound">'+esc(c.sound)+'</div>'+(c.meaning?'<div class="meaning">'+esc(c.meaning)+'</div>':"")+'<div class="word" lang="am" style="font-size:2rem;margin-top:10px">'+esc(c.front)+'</div>';
+var all=inDeck(),k=all.filter(function(x){return known[x.id];}).length;
+$("pos").textContent="Card "+(idx+1)+" of "+order.length;$("known").textContent="Got it: "+k+" of "+all.length;$("fill").style.width=(all.length?k/all.length*100:0)+"%";}
+function next(){if(!order.length)return;idx=(idx+1)%order.length;show();}
+function flip(){if(!cur())return;flipped=!flipped;$("card").classList.toggle("flip",flipped);if(flipped)sayLater(cur().front);else clearTimeout(tm);}
+function label(c){var m=c.deck==="Words"||c.deck==="Numbers"||c.deck==="My cards";return m&&c.meaning?c.meaning:c.sound;}
+function qStart(){var all=inDeck();if(all.length<2){$("qcard").innerHTML='<div class="meaning">Add at least 2 cards to this deck to take a quiz.</div>';$("opts").innerHTML="";$("qnext").hidden=true;$("qpos").textContent="";$("qscore").textContent="";q=null;return;}
+q={list:shuf(all).slice(0,10),i:0,score:0,miss:[]};qShow();}
+function qShow(){var c=q.list[q.i],ans=label(c);
+var pool=shuf(inDeck().filter(function(x){return label(x)!==ans;})),opts=[ans];
+pool.forEach(function(x){var l=label(x);if(opts.length<4&&opts.indexOf(l)<0)opts.push(l);});opts=shuf(opts);
+var cls=Array.from(c.front).length>1?"word":"big";
+$("qcard").innerHTML='<div class="'+cls+'" lang="am">'+esc(c.front)+'</div><div class="hint">'+(c.deck==="Words"||c.deck==="Numbers"?"What does it mean?":"What sound does it make?")+'</div>';
+$("opts").innerHTML=opts.map(function(o){return '<button class="opt" data-o="'+esc(o).replace(/"/g,"&quot;")+'">'+esc(o)+'</button>';}).join("");
+$("qnext").hidden=true;$("qpos").textContent="Question "+(q.i+1)+" of "+q.list.length;$("qscore").textContent="Score: "+q.score;}
+function qEnd(){var n=q.list.length,h='<div class="score">'+q.score+' / '+n+'</div><div class="meaning">'+(q.score===n?"Perfect. Amazing work!":q.score>=n*.7?"Great job. Keep going!":"Good start. Practice makes it stick.")+'</div>';
+if(q.miss.length)h+='<div class="hint">Practice these: <span lang="am" style="font-size:1.4rem">'+q.miss.map(esc).join(" ")+'</span></div>';
+$("qcard").innerHTML=h;$("opts").innerHTML="";$("qnext").hidden=false;$("qnext").textContent="Play again";q.done=true;$("qpos").textContent="Finished";}
+$("opts").onclick=function(e){var b=e.target.closest(".opt");if(!b||!q||q.locked)return;var c=q.list[q.i],ans=label(c),ok=b.getAttribute("data-o")===ans;q.locked=true;sayLater(c.front);
+Array.prototype.forEach.call($("opts").children,function(x){if(x.getAttribute("data-o")===ans)x.classList.add("ok");});
+if(ok)q.score++;else{b.classList.add("no");q.miss.push(c.front);}
+$("qscore").textContent="Score: "+q.score;$("qnext").hidden=false;$("qnext").textContent=q.i+1<q.list.length?"Next question":"See my score";};
+$("qnext").onclick=function(){clearTimeout(tm);if(!q)return;if(q.done){qStart();return;}q.locked=false;q.i++;if(q.i<q.list.length)qShow();else qEnd();};
+var CHL=[0x1200,0x1208,0x1210,0x1218,0x1220,0x1228,0x1230,0x1238,0x1240,0x1260,0x1268,0x1270,0x1278,0x1280,0x1290,0x1298,0x12A0],
+CHR=[0x12A8,0x12B8,0x12C8,0x12D0,0x12D8,0x12E0,0x12E8,0x12F0,0x1300,0x1308,0x1320,0x1328,0x1330,0x1338,0x1340,0x1348,0x1350],
+LBL=["h","l","ḥ","m","ś","r","s","š","q","b","v","t","č","ḫ","n","ñ","a"],
+LBR=["k","x","w","ʿ","z","ž","y","d","ǧ","g","ṭ","č̣","p̣","ṣ","ṣ́","f","p"],
+HEAD=["ä","u","i","a","ē","ə","o"];
+function cardFor(ch){return cards.filter(function(c){return c.front===ch;})[0];}
+function chartTable(bases,labels){var h="<table><thead><tr><th></th>"+HEAD.map(function(o){return "<th>"+o+"</th>";}).join("")+"</tr></thead><tbody>";
+bases.forEach(function(b,r){h+='<tr><td class="h">'+labels[r]+"</td>";for(var k=0;k<7;k++){var ch=String.fromCharCode(b+k),c=cardFor(ch);h+='<td><button data-c="'+ch+'" lang="am" aria-label="'+ch+(c?", "+esc(c.sound):"")+'">'+ch+"</button></td>";}h+="</tr>";});
+return h+"</tbody></table>";}
+function drawChart(){$("chart").innerHTML='<div class="ctabs">'+chartTable(CHL,LBL)+chartTable(CHR,LBR)+"</div>";}
+$("chart").onclick=function(e){var b=e.target.closest("button");if(!b)return;var ch=b.getAttribute("data-c"),c=cardFor(ch)||{front:ch,sound:"",meaning:""};$("cinfo").hidden=false;$("cinfo").textContent=c.front+"  =  "+c.sound+(c.meaning?"  ("+c.meaning+")":"");sayLater(c.front);};
+var g=null,XSET=[0x1238,0x1268,0x1278,0x1298,0x12B8,0x12E0,0x1300,0x1328];
+function gRows(){var s=$("gsrc").value,all=CHL.map(function(b,i){return [b,LBL[i]];}).concat(CHR.map(function(b,i){return [b,LBR[i]];})),o=[];
+all.forEach(function(p){var ex=XSET.indexOf(p[0])>=0;if(s==="c"&&ex)return;if(s==="x"&&!ex)return;var row=[];for(var k=0;k<7;k++){var ch=String.fromCharCode(p[0]+k);row.push(cardFor(ch)||{front:ch,sound:p[1]+ORD[k],meaning:""});}row.lab=p[1];o.push(row);});return o;}
+function gStart(){var R=gRows(),m=$("gord").value;$("gnext").hidden=true;$("gmsg").textContent="";if(!R.length){$("gaprow").innerHTML="";$("bank").innerHTML="";$("gmsg").textContent="No rows found.";return;}
+if(m==="s")R=shuf(R);else if(m==="q")R=shuf(R).slice(0,5);g={R:R,i:0,score:0,miss:[],end:false};gShow();}
+function gShow(){var row=g.R[g.i];g.row=row;g.gaps=shuf([1,2,3,4,5,6]).slice(0,+$("gn").value).sort(function(a,b){return a-b;});g.step=0;g.clean=true;g.done=false;
+var gl=g.gaps.map(function(k){return row[k].front;}),others=shuf(row.map(function(c){return c.front;}).filter(function(l){return gl.indexOf(l)<0;})).slice(0,2);
+$("bank").innerHTML=shuf(gl.concat(others)).map(function(l){return '<button lang="am" data-l="'+l+'">'+l+"</button>";}).join("");
+gDraw();$("gnext").hidden=true;$("gpos").textContent="Consonant "+row.lab+" · "+(g.i+1)+" of "+g.R.length;$("gscore").textContent="Perfect rows: "+g.score;gAsk();}
+function gAsk(){var t=g.row[g.gaps[g.step]];$("gmsg").textContent=$("gh").value==="1"?"Which letter says “"+t.sound+"”?":"Which letter fits the highlighted gap?";}
+function gDraw(){var h="";g.row.forEach(function(c,k){var gi=g.gaps.indexOf(k),open=gi>=0&&gi>=g.step,cls="tile"+(open?" gap":"")+(gi>=0&&gi<g.step?" done":"")+(open&&gi===g.step?" act":"");var s=$("gh").value==="1"||k===0?c.sound:"";h+='<div class="'+cls+'"><div class="g" lang="am">'+(open?"?":esc(c.front))+'</div><div class="s">'+esc(s)+"</div></div>";});$("gaprow").innerHTML=h;}
+$("bank").onclick=function(e){var b=e.target.closest("button");if(!b||!g||g.done||b.classList.contains("used"))return;var t=g.row[g.gaps[g.step]];
+if(b.getAttribute("data-l")===t.front){b.classList.add("used");sayLater(t.front);g.step++;gDraw();
+if(g.step>=g.gaps.length){if(g.clean)g.score++;g.done=true;$("gscore").textContent="Perfect rows: "+g.score;$("gmsg").textContent=g.clean?"Perfect! Row complete.":"Row complete. This one is marked for more practice.";$("gnext").hidden=false;$("gnext").textContent=g.i+1<g.R.length?"Next row":"See my score";}else gAsk();}
+else{if(g.clean)g.miss.push(g.row[0].front);g.clean=false;b.classList.add("no");setTimeout(function(){b.classList.remove("no");},700);$("gmsg").textContent="Not quite. Look at the letters around the gap and try again.";}};
+$("gnext").onclick=function(){clearTimeout(tm);if(!g)return;if(g.end){gStart();return;}if(g.i+1<g.R.length){g.i++;gShow();}else{g.end=true;
+var h='<div style="grid-column:1/-1;text-align:center"><div class="score">'+g.score+" / "+g.R.length+'</div><div class="meaning">Rows finished with no mistakes</div>';
+if(g.miss.length)h+='<div class="hint">Practice these families again: <span lang="am" style="font-size:1.5rem">'+g.miss.map(esc).join(" ")+"</span></div>";
+$("gaprow").innerHTML=h+"</div>";$("bank").innerHTML="";$("gmsg").textContent="";$("gnext").textContent="Play again";$("gpos").textContent="Finished";}};
+["gord","gsrc","gn","gh"].forEach(function(i){$(i).onchange=gStart;});
+function setMode(m){clearTimeout(tm);mode=m;Array.prototype.forEach.call($("modes").children,function(b){b.setAttribute("aria-pressed",b.getAttribute("data-m")===m);});
+$("flash").hidden=m!=="flash";$("quizbox").hidden=m!=="quiz";$("chartbox").hidden=m!=="chart";$("gapbox").hidden=m!=="gap";$("decks").hidden=m==="chart"||m==="gap";
+if(m==="quiz")qStart();if(m==="chart")drawChart();if(m==="gap")gStart();}
+$("modes").onclick=function(e){var m=e.target.getAttribute("data-m");if(m)setMode(m);};
+function drawDecks(){var h="";DECKS.forEach(function(d){h+='<button class="deck" data-d="'+d+'" aria-pressed="'+(d===deck)+'">'+d+'</button>';});$("decks").innerHTML=h;
+$("fdeck").innerHTML=DECKS.map(function(d){return "<option>"+d+"</option>";}).join("");$("fdeck").value=deck;}
+function drawList(){var h="";inDeck().forEach(function(c){h+='<div class="row"><span class="f" lang="am">'+esc(c.front)+'</span><span class="t">'+esc(c.sound)+(c.meaning?" · "+esc(c.meaning):"")+'</span><button class="mini" data-e="'+c.id+'">Edit</button><button class="mini" data-x="'+c.id+'">Delete</button></div>';});$("list").innerHTML=h||'<p class="hint">No cards here yet.</p>';}
+function refresh(s){rebuild(s);drawDecks();drawList();show();if(mode==="quiz")qStart();if(mode==="chart")drawChart();if(mode==="gap")gStart();}
+$("decks").onclick=function(e){var d=e.target.getAttribute("data-d");if(d){deck=d;refresh(false);}};
+$("card").onclick=flip;
+$("got").onclick=function(){var c=cur();if(!c)return;known[c.id]=1;save("fidel-known-2",known);next();};
+$("again").onclick=function(){var c=cur();if(!c)return;delete known[c.id];save("fidel-known-2",known);next();};
+$("prev").onclick=function(){if(!order.length)return;idx=(idx-1+order.length)%order.length;show();};
+$("shuf").onclick=function(){refresh(true);};
+$("reset").onclick=function(){inDeck().forEach(function(c){delete known[c.id];});save("fidel-known-2",known);refresh(false);};
+$("speak").onclick=function(){var c=cur();if(c&&!say(c.front))alert("This browser can’t speak aloud.");};
+document.addEventListener("keydown",function(e){if(mode!=="flash"||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;if(e.key===" "){e.preventDefault();flip();}else if(e.key==="ArrowRight")next();else if(e.key==="ArrowLeft")$("prev").onclick();});
+$("form").onsubmit=function(e){e.preventDefault();var o={deck:$("fdeck").value,front:$("ffront").value.trim(),sound:$("fsound").value.trim(),meaning:$("fmean").value.trim()};if(!o.front||!o.sound)return;
+if(editId){cards=cards.map(function(c){return c.id===editId?Object.assign(c,o):c;});editId=null;$("fsave").textContent="Add card";}else{o.id="c"+Date.now();cards.push(o);}
+save("fidel-cards-2",cards);deck=o.deck;$("form").reset();refresh(false);};
+$("list").onclick=function(e){var x=e.target.getAttribute("data-x"),ed=e.target.getAttribute("data-e");
+if(x){cards=cards.filter(function(c){return c.id!==x;});save("fidel-cards-2",cards);refresh(false);}
+if(ed){var c=cards.filter(function(k){return k.id===ed;})[0];editId=ed;$("fdeck").value=c.deck;$("ffront").value=c.front;$("fsound").value=c.sound;$("fmean").value=c.meaning||"";$("fsave").textContent="Save changes";$("ffront").focus();}};
+$("exp").onclick=function(){$("io").hidden=false;$("io").value=JSON.stringify(cards);$("io").select();try{document.execCommand("copy");}catch(e){}};
+$("imp").onclick=function(){if($("io").hidden){$("io").hidden=false;$("io").value="";$("io").focus();return;}try{var v=JSON.parse($("io").value);if(!Array.isArray(v))throw 0;cards=v;save("fidel-cards-2",cards);refresh(false);}catch(e){alert("Those cards couldn’t be read. Paste the text from Copy all cards.");}};
+$("def").onclick=function(){if(confirm("Replace all cards with the starter set?")){cards=starter();known={};save("fidel-cards-2",cards);save("fidel-known-2",known);refresh(false);}};
+$("sndon").value=snd.on;$("snddelay").value=snd.delay;
+$("sndon").onchange=$("snddelay").onchange=function(){snd={on:$("sndon").value,delay:$("snddelay").value};save("fidel-snd",snd);};
+refresh(false);
+})();
+</script>
+<script>if("serviceWorker" in navigator&&location.protocol==="https:"){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
+
+<script>
+(function(){
+  var deferredPrompt = null;
+  var btn = document.getElementById("installBtn");
+  if (!btn) return;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && !window.navigator.standalone) btn.hidden = false;
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    btn.hidden = false;
+  });
+  window.addEventListener("appinstalled", function(){ btn.hidden = true; deferredPrompt = null; });
+  btn.addEventListener("click", async function(){
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      btn.hidden = true;
+    } else if (isIOS) {
+      alert("To install Fidel: open this page in Safari, tap Share, then choose Add to Home Screen.");
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "appId": "com.fidel.flashcards",
+  "appName": "Fidel Flashcards",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
